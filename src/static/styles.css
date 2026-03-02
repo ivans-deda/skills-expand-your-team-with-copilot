@@ -612,7 +612,54 @@ footer {
   }
 }
 
-/* User controls in header */
+/* Social sharing */
+.share-button {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: transparent;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  line-height: 1;
+  transition: background-color 0.2s;
+  color: var(--text-secondary);
+}
+
+.share-button:hover {
+  background-color: var(--border-light);
+}
+
+.share-dropdown {
+  position: absolute;
+  top: 34px;
+  left: 8px;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  min-width: 190px;
+  overflow: hidden;
+}
+
+.share-option {
+  display: block;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: background-color 0.15s;
+  white-space: nowrap;
+}
+
+.share-option:hover {
+  background-color: var(--background);
+}
+
+
 #user-controls {
   position: absolute;
   top: 10px;

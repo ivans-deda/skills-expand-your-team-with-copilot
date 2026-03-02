@@ -521,6 +521,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     activityCard.innerHTML = `
       ${tagHtml}
+      <button class="share-button tooltip" aria-label="Share this activity">
+        📤
+        <span class="tooltip-text">Share this activity</span>
+      </button>
       <h4>${name}</h4>
       <p>${details.description}</p>
       <p class="tooltip">
@@ -569,6 +573,13 @@ document.addEventListener("DOMContentLoaded", () => {
         `
         }
       </div>
+      <div class="share-dropdown hidden">
+        <a class="share-option" data-platform="twitter" href="#">🐦 Share on X (Twitter)</a>
+        <a class="share-option" data-platform="facebook" href="#">📘 Share on Facebook</a>
+        <a class="share-option" data-platform="whatsapp" href="#">💬 Share on WhatsApp</a>
+        <a class="share-option" data-platform="email" href="#">✉️ Share via Email</a>
+        <a class="share-option" data-platform="copy" href="#">🔗 Copy Link</a>
+      </div>
     `;
 
     // Add click handlers for delete buttons
@@ -586,6 +597,60 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
     }
+
+    // Add share button functionality
+    const shareButton = activityCard.querySelector(".share-button");
+    const shareDropdown = activityCard.querySelector(".share-dropdown");
+    const activityParams = new URLSearchParams({ activity: name });
+    const activityUrl = `${window.location.origin}${window.location.pathname}?${activityParams.toString()}`;
+    const shareText = `Check out "${name}" at Mergington High School! ${details.description}`;
+
+    shareButton.addEventListener("click", (event) => {
+      event.stopPropagation();
+      // Use Web Share API if available (mobile/modern browsers)
+      if (navigator.share) {
+        navigator.share({
+          title: name,
+          text: shareText,
+          url: activityUrl,
+        }).catch(() => {});
+      } else {
+        // Toggle dropdown for desktop
+        shareDropdown.classList.toggle("hidden");
+      }
+    });
+
+    // Handle share option clicks
+    shareDropdown.querySelectorAll(".share-option").forEach((option) => {
+      option.addEventListener("click", (event) => {
+        event.preventDefault();
+        const platform = option.dataset.platform;
+        const encodedUrl = encodeURIComponent(activityUrl);
+        const encodedText = encodeURIComponent(shareText);
+
+        if (platform === "twitter") {
+          window.open(`https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`, "_blank");
+        } else if (platform === "facebook") {
+          window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`, "_blank");
+        } else if (platform === "whatsapp") {
+          window.open(`https://wa.me/?text=${encodedText}%20${encodedUrl}`, "_blank");
+        } else if (platform === "email") {
+          window.location.href = `mailto:?subject=${encodeURIComponent(name)}&body=${encodedText}%20${encodedUrl}`;
+        } else if (platform === "copy") {
+          if (navigator.clipboard) {
+            navigator.clipboard.writeText(activityUrl).then(() => {
+              showMessage("Link copied to clipboard!", "success");
+            }).catch(() => {
+              showMessage("Could not copy link. Please copy manually: " + activityUrl, "info");
+            });
+          } else {
+            showMessage("Copy not supported. Link: " + activityUrl, "info");
+          }
+        }
+
+        shareDropdown.classList.add("hidden");
+      });
+    });
 
     activitiesList.appendChild(activityCard);
   }
@@ -860,6 +925,15 @@ document.addEventListener("DOMContentLoaded", () => {
     setDayFilter,
     setTimeRangeFilter,
   };
+
+  // Close any open share dropdowns when clicking outside them
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest(".share-button") && !event.target.closest(".share-dropdown")) {
+      document.querySelectorAll(".share-dropdown").forEach((dropdown) => {
+        dropdown.classList.add("hidden");
+      });
+    }
+  });
 
   // Initialize app
   checkAuthentication();
